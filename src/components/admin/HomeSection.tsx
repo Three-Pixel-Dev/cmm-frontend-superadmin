@@ -71,10 +71,10 @@ export function HomeSection({ name, email, roleName, allowedCodes }: HomeSection
             No modules assigned
           </h3>
           <p className="mt-2 text-sm text-muted-foreground">
-            You can still update your profile and password in Settings.
+            You can still update your password in Settings.
           </p>
           <Button asChild variant="outline" className="mt-4 gap-2">
-            <Link to={SECTION_PATHS["settings-profile"]} aria-label="Open account settings">
+            <Link to={SECTION_PATHS["settings-security"]} aria-label="Open account settings">
               <Settings className="h-4 w-4" aria-hidden="true" />
               Open Settings
             </Link>

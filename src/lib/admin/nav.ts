@@ -1,16 +1,5 @@
 import type { LucideIcon } from "lucide-react";
-import {
-  CreditCard,
-  Home,
-  KeyRound,
-  MessageCircle,
-  QrCode,
-  Settings,
-  UserCog,
-  Users,
-  Wallet,
-  WalletCards,
-} from "lucide-react";
+import { Home, KeyRound, Settings, Users, Wallet } from "lucide-react";
 
 export type SettingsSectionKey =
   | "profile"
@@ -52,34 +41,7 @@ export type RbacSection = Exclude<
   | "settings-telegram"
 >;
 
-const PERSONAL_SETTINGS_SECTIONS: AdminSection[] = [
-  "settings-profile",
-  "settings-security",
-  "settings-payment",
-];
-
-function settingsSectionAllowed(section: AdminSection, allow: Set<string>): boolean {
-  if (PERSONAL_SETTINGS_SECTIONS.includes(section)) return true;
-  if (allow.has("*")) return true;
-  switch (section) {
-    case "settings-payment-types":
-    case "settings-crypto-wallet":
-      return allow.has("wallets");
-    case "settings-telegram":
-      return allow.has("telegram") || allow.has("p2p");
-    default:
-      return false;
-  }
-}
-
-function filterSettingsSidebar(allow?: Set<string>): SidebarGroup {
-  const children = SETTINGS_SIDEBAR.children.filter((child) => {
-    if (!allow) return PERSONAL_SETTINGS_SECTIONS.includes(child.key);
-    if (allow.has("*")) return true;
-    return settingsSectionAllowed(child.key, allow);
-  });
-  return { ...SETTINGS_SIDEBAR, children };
-}
+const PERSONAL_SETTINGS_SECTIONS: AdminSection[] = ["settings-security"];
 
 export const SECTION_PATHS: Record<AdminSection, string> = {
   home: "/",
@@ -176,55 +138,12 @@ const HOME_SIDEBAR: SidebarLeaf = {
   to: SECTION_PATHS.home,
 };
 
-const SETTINGS_SIDEBAR: SidebarGroup = {
-  type: "group",
-  id: "settings-group",
+const SETTINGS_SIDEBAR: SidebarLeaf = {
+  type: "leaf",
+  key: "settings-security",
   label: "Settings",
   Icon: Settings,
-  children: [
-    {
-      type: "leaf",
-      key: "settings-profile",
-      label: "Profile",
-      Icon: UserCog,
-      to: SECTION_PATHS["settings-profile"],
-    },
-    {
-      type: "leaf",
-      key: "settings-security",
-      label: "Security",
-      Icon: KeyRound,
-      to: SECTION_PATHS["settings-security"],
-    },
-    {
-      type: "leaf",
-      key: "settings-payment-types",
-      label: "Payment types",
-      Icon: WalletCards,
-      to: SECTION_PATHS["settings-payment-types"],
-    },
-    {
-      type: "leaf",
-      key: "settings-payment",
-      label: "Payment methods",
-      Icon: CreditCard,
-      to: SECTION_PATHS["settings-payment"],
-    },
-    {
-      type: "leaf",
-      key: "settings-crypto-wallet",
-      label: "Crypto wallet",
-      Icon: QrCode,
-      to: SECTION_PATHS["settings-crypto-wallet"],
-    },
-    {
-      type: "leaf",
-      key: "settings-telegram",
-      label: "Telegram",
-      Icon: MessageCircle,
-      to: SECTION_PATHS["settings-telegram"],
-    },
-  ],
+  to: SECTION_PATHS["settings-security"],
 };
 
 export const RBAC_NAV: NavEntry[] = [
@@ -301,8 +220,7 @@ function toSidebarEntries(entries: NavEntry[]): SidebarEntry[] {
 }
 
 export function buildSidebarNav(allowed?: string[]): SidebarEntry[] {
-  const allowSet = allowed ? new Set(allowed) : undefined;
-  const settings: SidebarEntry[] = [filterSettingsSidebar(allowSet)];
+  const settings: SidebarEntry[] = [SETTINGS_SIDEBAR];
   if (allowed?.includes("*")) {
     return [HOME_SIDEBAR, ...toSidebarEntries(RBAC_NAV), ...settings];
   }
@@ -318,14 +236,7 @@ export function groupContains(group: SidebarGroup, active: AdminSection) {
 }
 
 export function isSettingsSection(section: AdminSection): boolean {
-  return (
-    section === "settings-profile" ||
-    section === "settings-security" ||
-    section === "settings-payment-types" ||
-    section === "settings-payment" ||
-    section === "settings-crypto-wallet" ||
-    section === "settings-telegram"
-  );
+  return section === "settings-security";
 }
 
 export function isSectionAllowed(
@@ -341,11 +252,6 @@ export function isSectionAllowed(
   if (section === "home") return true;
   if (section === "access-codes") return allowed?.includes("*") === true;
   if (PERSONAL_SETTINGS_SECTIONS.includes(section)) return true;
-  if (isSettingsSection(section)) {
-    if (allowed === undefined) return false;
-    if (allowed.includes("*")) return true;
-    return settingsSectionAllowed(section, new Set(allowed));
-  }
   if (allowed === undefined) return false;
   if (allowed.includes("*")) return true;
   if (section === "market-categories") return allowed.includes("markets");
@@ -356,12 +262,7 @@ export function isSectionAllowed(
 
 export function pathToSection(pathname: string): AdminSection {
   const path = pathname.replace(/\/$/, "") || "/";
-  if (path === "/settings/payment-types") return "settings-payment-types";
-  if (path === "/settings/payment") return "settings-payment";
-  if (path === "/settings/crypto-wallet") return "settings-crypto-wallet";
-  if (path === "/settings/telegram") return "settings-telegram";
-  if (path === "/settings/security") return "settings-security";
-  if (path.startsWith("/settings")) return "settings-profile";
+  if (path.startsWith("/settings")) return "settings-security";
   if (path === "/dashboard") return "dashboard";
   if (path === "/users") return "users";
   if (path === "/access-codes") return "access-codes";

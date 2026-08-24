@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Search, MoreHorizontal, Plus, Wallet as WalletIcon, Coins, Sparkles } from "lucide-react";
+import { Search, MoreHorizontal, Plus, Wallet as WalletIcon, Coins } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -103,7 +103,7 @@ export function WalletsScreen() {
       ) : (walletsQ.data?.items.length ?? 0) === 0 ? (
         <EmptyState message="No wallets found." />
       ) : (
-        <TableShell head={["User", "Real balance", "Virtual balance", "Status", "Updated", ""]}>
+        <TableShell head={["User", "Balance", "Status", "Updated", ""]}>
           {walletsQ.data!.items.map((w) => (
             <tr
               key={w.id}
@@ -117,12 +117,6 @@ export function WalletsScreen() {
                 <span className="inline-flex items-center gap-1.5 font-medium tabular-nums">
                   <Coins className="h-3.5 w-3.5 text-amber-400" />
                   {fmtAmount(w.amount)}
-                </span>
-              </td>
-              <td className="px-4 py-3">
-                <span className="inline-flex items-center gap-1.5 tabular-nums text-muted-foreground">
-                  <Sparkles className="h-3.5 w-3.5 text-violet-400" />
-                  {fmtAmount(w.virtual_amount)}
                 </span>
               </td>
               <td className="px-4 py-3">
@@ -192,8 +186,7 @@ function CreateWalletDialog({
 }) {
   const [userId, setUserId] = useState("");
   const [selectedUser, setSelectedUser] = useState<ApiUser | null>(null);
-  const [realAmount, setRealAmount] = useState("");
-  const [virtualAmount, setVirtualAmount] = useState("");
+  const [amount, setAmount] = useState("");
 
   const submit = () => {
     if (!userId) {
@@ -201,21 +194,13 @@ function CreateWalletDialog({
       return;
     }
     const body: CreateWalletPayload = { user_id: userId };
-    if (realAmount.trim() !== "") {
-      const n = Number(realAmount);
+    if (amount.trim() !== "") {
+      const n = Number(amount);
       if (!Number.isFinite(n) || n < 0) {
-        toast.error("Real balance must be a non-negative number");
+        toast.error("Balance must be a non-negative number");
         return;
       }
       body.amount = String(n);
-    }
-    if (virtualAmount.trim() !== "") {
-      const n = Number(virtualAmount);
-      if (!Number.isFinite(n) || n < 0) {
-        toast.error("Virtual balance must be a non-negative number");
-        return;
-      }
-      body.virtual_amount = String(n);
     }
     onSubmit(body);
   };
@@ -242,28 +227,16 @@ function CreateWalletDialog({
           <p className="text-xs text-muted-foreground">
             Users who already have a wallet are hidden from this list.
           </p>
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="Initial real balance (optional)">
-              <Input
-                type="number"
-                min="0"
-                step="any"
-                value={realAmount}
-                onChange={(e) => setRealAmount(e.target.value)}
-                placeholder="0"
-              />
-            </Field>
-            <Field label="Initial virtual balance (optional)">
-              <Input
-                type="number"
-                min="0"
-                step="any"
-                value={virtualAmount}
-                onChange={(e) => setVirtualAmount(e.target.value)}
-                placeholder="0"
-              />
-            </Field>
-          </div>
+          <Field label="Initial balance (optional)">
+            <Input
+              type="number"
+              min="0"
+              step="any"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              placeholder="0"
+            />
+          </Field>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>
@@ -289,12 +262,11 @@ function AdjustWalletDialog({
   onSubmit: (body: AdjustWalletPayload) => void;
   submitting: boolean;
 }) {
-  const [ledger, setLedger] = useState<"real" | "virtual">("real");
   const [mode, setMode] = useState<"credit" | "debit">("credit");
   const [amount, setAmount] = useState("");
   const [reason, setReason] = useState("");
 
-  const current = ledger === "real" ? wallet.amount : wallet.virtual_amount;
+  const current = wallet.amount;
 
   const submit = () => {
     const value = Number(amount);
@@ -303,7 +275,7 @@ function AdjustWalletDialog({
       return;
     }
     const delta = mode === "debit" ? -value : value;
-    onSubmit({ ledger, delta: String(delta), reason: reason.trim() || undefined });
+    onSubmit({ ledger: "real", delta: String(delta), reason: reason.trim() || undefined });
   };
 
   return (
@@ -313,18 +285,8 @@ function AdjustWalletDialog({
           <DialogTitle>Adjust wallet — {wallet.user_name || wallet.user_email}</DialogTitle>
         </DialogHeader>
         <div className="space-y-3 py-2">
-          <Field label="Ledger">
-            <select
-              value={ledger}
-              onChange={(e) => setLedger(e.target.value as "real" | "virtual")}
-              className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              <option value="real">Real</option>
-              <option value="virtual">Virtual</option>
-            </select>
-          </Field>
           <p className="text-xs text-muted-foreground">
-            Current {ledger} balance:{" "}
+            Current balance:{" "}
             <span className="font-medium text-foreground tabular-nums">{fmtAmount(current)}</span>
           </p>
           <Field label="Direction">

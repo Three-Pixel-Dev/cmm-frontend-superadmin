@@ -1,11 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { PlatformCryptoWalletSection } from "@/components/wallet/PlatformCryptoWalletSection";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_admin/settings/crypto-wallet")({
-  head: () => ({ meta: [{ title: "Crypto wallet — Settings — SuperCash Admin" }] }),
-  component: CryptoWalletSettingsPage,
+  beforeLoad: () => {
+    throw redirect({ to: "/settings/security" });
+  },
+  component: () => null,
 });
-
-function CryptoWalletSettingsPage() {
-  return <PlatformCryptoWalletSection embedded />;
-}

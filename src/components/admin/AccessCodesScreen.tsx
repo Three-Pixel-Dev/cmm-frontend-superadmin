@@ -28,7 +28,7 @@ export function AccessCodesScreen() {
       setFreshCode(row);
       setLabel("");
       setHostName("");
-      toast.success("Access code created — copy it now. It will not be shown again.");
+      toast.success("Access code created");
       void qc.invalidateQueries({ queryKey: ["admin", "access-codes"] });
     },
     onError: (err: Error) => toast.error(err.message),
@@ -65,7 +65,8 @@ export function AccessCodesScreen() {
             <h2 className="text-lg font-semibold">Host access codes</h2>
             <p className="mt-1 text-sm text-muted-foreground">
               Issue a code, send it to a host, and they sign in on the game app. First use creates
-              their room-admin account.
+              their room-admin account. Codes stay visible here so you can resend them if a host
+              forgets.
             </p>
           </div>
         </div>
@@ -105,7 +106,7 @@ export function AccessCodesScreen() {
           <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-primary/30 bg-primary/10 px-4 py-3">
             <div>
               <p className="text-xs font-semibold uppercase tracking-wide text-primary">
-                Plaintext (once)
+                New access code
               </p>
               <p className="mt-1 font-mono text-2xl tracking-[0.28em]">{freshCode.code}</p>
             </div>
@@ -122,6 +123,7 @@ export function AccessCodesScreen() {
           <thead className="bg-muted/40 text-left text-xs uppercase tracking-wide text-muted-foreground">
             <tr>
               <th className="px-4 py-3 font-medium">Label</th>
+              <th className="px-4 py-3 font-medium">Code</th>
               <th className="px-4 py-3 font-medium">Host</th>
               <th className="px-4 py-3 font-medium">Status</th>
               <th className="px-4 py-3 font-medium">Last used</th>
@@ -131,13 +133,13 @@ export function AccessCodesScreen() {
           <tbody>
             {listQ.isLoading ? (
               <tr>
-                <td colSpan={5} className="px-4 py-10 text-center text-muted-foreground">
+                <td colSpan={6} className="px-4 py-10 text-center text-muted-foreground">
                   <Loader2 className="mx-auto h-5 w-5 animate-spin" />
                 </td>
               </tr>
             ) : rows.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-4 py-10 text-center text-muted-foreground">
+                <td colSpan={6} className="px-4 py-10 text-center text-muted-foreground">
                   No codes yet.
                 </td>
               </tr>
@@ -145,6 +147,26 @@ export function AccessCodesScreen() {
               rows.map((row) => (
                 <tr key={row.id} className="border-t border-border/50">
                   <td className="px-4 py-3 font-medium">{row.label}</td>
+                  <td className="px-4 py-3">
+                    {row.code ? (
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono text-sm tracking-wider">{row.code}</span>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="ghost"
+                          className="h-7 px-2 text-muted-foreground"
+                          onClick={() => void copy(row.code!)}
+                          aria-label={`Copy code for ${row.label}`}
+                        >
+                          <Copy className="h-3.5 w-3.5" />
+                          Copy
+                        </Button>
+                      </div>
+                    ) : (
+                      <span className="text-muted-foreground">Not stored</span>
+                    )}
+                  </td>
                   <td className="px-4 py-3 text-muted-foreground">{row.host_name || "—"}</td>
                   <td className="px-4 py-3">
                     {row.is_active ? (

@@ -1,5 +1,4 @@
 import type { ReactNode } from "react";
-import { Link } from "@tanstack/react-router";
 import { Loader2, QrCode } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { shortenAddress, useCryptoWallet } from "@/hooks/useCryptoWallet";
@@ -30,12 +29,9 @@ export function PlatformCryptoWalletGate({
   if (!hasSavedWallet) {
     return (
       <div className={className}>
-        <p className="mb-3 text-xs text-muted-foreground">
-          Connect the platform shared wallet in Settings → Crypto wallet before paying.
+        <p className="text-xs text-muted-foreground">
+          Platform shared wallet is not configured, so crypto payouts are unavailable.
         </p>
-        <Button asChild variant="outline" className="w-full">
-          <Link to="/settings/crypto-wallet">Open crypto wallet settings</Link>
-        </Button>
       </div>
     );
   }
@@ -85,13 +81,9 @@ export function PlatformCryptoWalletGate({
   if (!platformMatch) {
     return (
       <div className={className}>
-        <p className="mb-3 text-xs text-amber-500">
+        <p className="text-xs text-amber-500">
           Connected wallet does not match the platform wallet ({shortenAddress(savedAddress!)}).
-          Connect the correct wallet in Settings.
         </p>
-        <Button asChild variant="outline" className="w-full">
-          <Link to="/settings/crypto-wallet">Open crypto wallet settings</Link>
-        </Button>
       </div>
     );
   }

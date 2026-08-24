@@ -16,15 +16,11 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { transactionsApi } from "@/lib/admin/api";
 import type { ApiTransaction } from "@/lib/admin/types";
 import { fmtVks } from "@/lib/format";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
-import { useState } from "react";
-
-type LedgerTab = "real" | "virtual";
 
 export const UserTransactionsDialog = ({
   userId,
@@ -37,8 +33,6 @@ export const UserTransactionsDialog = ({
   open: boolean;
   onClose: () => void;
 }) => {
-  const [tab, setTab] = useState<LedgerTab>("real");
-
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
       <DialogContent className="sm:max-w-4xl max-h-[90vh] flex flex-col p-6">
@@ -47,23 +41,9 @@ export const UserTransactionsDialog = ({
           {userLabel && <p className="text-sm text-muted-foreground">{userLabel}</p>}
         </DialogHeader>
 
-        <Tabs
-          value={tab}
-          onValueChange={(value) => setTab(value as LedgerTab)}
-          className="flex flex-1 flex-col overflow-hidden"
-        >
-          <TabsList className="w-fit justify-start self-start">
-            <TabsTrigger value="real">Real</TabsTrigger>
-            <TabsTrigger value="virtual">Virtual</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="real" className="flex-1 overflow-hidden">
-            <TransactionsPanel userId={userId} ledger="real" enabled={open && tab === "real"} />
-          </TabsContent>
-          <TabsContent value="virtual" className="flex-1 overflow-hidden">
-            <TransactionsPanel userId={userId} ledger="virtual" enabled={open && tab === "virtual"} />
-          </TabsContent>
-        </Tabs>
+        <div className="flex-1 overflow-hidden">
+          <TransactionsPanel userId={userId} ledger="real" enabled={open} />
+        </div>
 
         <DialogFooter className="mt-auto">
           <Button variant="outline" onClick={onClose}>
@@ -81,7 +61,7 @@ function TransactionsPanel({
   enabled,
 }: {
   userId: string;
-  ledger: LedgerTab;
+  ledger: "real" | "virtual";
   enabled: boolean;
 }) {
   const txQ = useQuery({
