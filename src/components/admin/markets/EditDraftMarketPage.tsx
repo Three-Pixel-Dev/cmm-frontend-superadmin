@@ -42,7 +42,7 @@ export function EditDraftMarketPage({ marketId }: { marketId: string }) {
   });
 
   const form = useForm<EditDraftMarketInput>({
-    resolver: zodResolver(editDraftMarketSchema),
+    resolver: zodResolver(editDraftMarketSchema) as any,
     defaultValues: {
       category_id: "",
       title_en: "",
@@ -118,7 +118,7 @@ export function EditDraftMarketPage({ marketId }: { marketId: string }) {
       </div>
 
       <form
-        onSubmit={form.handleSubmit((data) => saveM.mutate(data))}
+        onSubmit={form.handleSubmit((data: any) => saveM.mutate(data))}
         className="space-y-8 rounded-xl border border-border/60 bg-card p-5 sm:p-8"
       >
         <section className="space-y-4">

@@ -126,7 +126,7 @@ export function MarketCategoriesSection() {
       {createOpen && (
         <CategoryFormDialog
           onClose={() => setCreateOpen(false)}
-          onSubmit={(body) => createM.mutate(body)}
+          onSubmit={(body) => createM.mutate(body as CreateMarketCategoryPayload)}
           submitting={createM.isPending}
         />
       )}

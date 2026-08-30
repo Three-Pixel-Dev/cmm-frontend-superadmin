@@ -53,7 +53,7 @@ export async function saveDraftMarketEdit(
     await marketItemsApi.create({
       market_id: marketId,
       ...payload,
-      options: item.options.map((o) => ({
+      options: item.options.map((o: any) => ({
         title_en: o.title_en,
         title_my: o.title_my || undefined,
         seed_count: o.seed_count,

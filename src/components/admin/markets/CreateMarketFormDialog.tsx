@@ -47,7 +47,7 @@ function toApiPayload(data: CreateMarketInput) {
           start_time: item.start_time.toISOString(),
           close_time: item.close_time.toISOString(),
           resolution_time: item.resolution_time.toISOString(),
-          options: item.options.map((o) => ({
+          options: item.options.map((o: any) => ({
             title_en: o.title_en,
             title_my: o.title_my || undefined,
             seed_count: o.seed_count,
@@ -279,7 +279,7 @@ export const CreateMarketFormDialog = ({
                 Add item
               </Button>
             </div>
-            <MarketItemFieldsBlock form={form} fields={fields} onRemove={remove} />
+            <MarketItemFieldsBlock form={form as any} fields={fields} onRemove={remove} />
           </div>
 
           <DialogFooter>

@@ -46,7 +46,7 @@ export const SUPPORTED_CHAINS: SupportedChain[] = [
   },
 ];
 
-export const DEFAULT_CHAIN_ID = bsc.id;
+export const DEFAULT_CHAIN_ID: number = bsc.id;
 
 const chainById = new Map(SUPPORTED_CHAINS.map((c) => [c.id, c]));
 
@@ -63,5 +63,5 @@ export function getSupportedChainIds(): number[] {
 }
 
 export function getWagmiChains() {
-  return SUPPORTED_CHAINS.map((c) => (c.id === bsc.id ? bsc : mainnet));
+  return [bsc, mainnet] as const;
 }

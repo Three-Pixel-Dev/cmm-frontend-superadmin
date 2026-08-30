@@ -139,7 +139,7 @@ export function PaymentMethodTypesTab() {
       {createOpen && (
         <TypeFormDialog
           onClose={() => setCreateOpen(false)}
-          onSubmit={(body) => createM.mutate(body)}
+          onSubmit={(body) => createM.mutate(body as CreatePaymentMethodTypePayload)}
           submitting={createM.isPending}
         />
       )}

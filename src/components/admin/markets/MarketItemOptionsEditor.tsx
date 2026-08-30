@@ -27,7 +27,7 @@ export function MarketItemOptionsEditor<T extends Record<string, unknown>>({
   control,
   name,
 }: Props<T>) {
-  const { fields, append, remove } = useFieldArray({ control, name });
+  const { fields, append, remove } = useFieldArray({ control: control as any, name: name as any });
 
   return (
     <div className="space-y-3 sm:col-span-2 lg:col-span-3">

@@ -9,7 +9,7 @@ import { nitro } from "nitro/vite";
 
 const isVercel = process.env.VERCEL === "1";
 
-export default defineConfig({
+export default (defineConfig as any)({
   cloudflare: isVercel ? false : undefined,
   plugins: isVercel ? [nitro()] : undefined,
   // Superadmin UI on 5174; API gateway on 8080 (VITE_API_BASE_URL in .env).

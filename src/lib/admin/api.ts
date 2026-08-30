@@ -65,6 +65,9 @@ import { CreateMarketItemInput, ResolveMarketItemInput, UpdateMarketItemInput } 
 import { FileResponse } from "@/types/file";
 
 declare module "axios" {
+  interface AxiosRequestConfig {
+    _skipAuthRefresh?: boolean;
+  }
   interface InternalAxiosRequestConfig {
     _skipAuthRefresh?: boolean;
   }
@@ -88,7 +91,7 @@ async function refreshSession(): Promise<void> {
 }
 
 // The Go services wrap payloads in { success, message, data, error }.
-interface ApiEnvelope<T> {
+export interface ApiEnvelope<T> {
   success: boolean;
   message?: string;
   data?: T;
@@ -141,8 +144,8 @@ http.interceptors.response.use(
   },
 );
 
-function data<T>(envelope: ApiEnvelope<T>): T {
-  return envelope.data as T;
+function data<T>(envelope?: ApiEnvelope<T> | null): T {
+  return (envelope?.data ?? envelope) as T;
 }
 
 // ─── Auth ─────────────────────────────────────────────────────────────────────
@@ -167,6 +170,7 @@ export type AccessCode = {
   host_name: string;
   code?: string;
   admin_user_id?: string | null;
+  max_participants: number;
   is_active: boolean;
   revoked_at?: string | null;
   last_used_at?: string | null;
@@ -176,7 +180,7 @@ export type AccessCode = {
 
 export const accessCodesApi = {
   list: () => http.get<ApiEnvelope<AccessCode[]>>("/admin/access-codes").then((r) => data(r.data)),
-  create: (body: { label: string; host_name?: string }) =>
+  create: (body: { label: string; host_name?: string; max_participants?: number }) =>
     http.post<ApiEnvelope<AccessCode>>("/admin/access-codes", body).then((r) => data(r.data)),
   revoke: (id: string) =>
     http.post<ApiEnvelope<AccessCode>>(`/admin/access-codes/${id}/revoke`).then((r) => data(r.data)),

@@ -31,15 +31,16 @@ export function PlatformCryptoWalletSection({ embedded = false }: { embedded?: b
   const displayAddress = crypto.isConnected ? crypto.address : savedAddress;
   const addressLabel = crypto.isConnected ? "Connected address" : "Saved platform address";
   const removeTargetAddress = crypto.address ?? savedAddress;
-  const walletBusy = crypto.disconnecting || crypto.removing;
+  const [removing, setRemoving] = useState(false);
+  const walletBusy = crypto.disconnecting || crypto.removing || removing;
 
   const handleRemove = async () => {
-    crypto.setRemoving(true);
+    setRemoving(true);
     try {
       await clearPlatformCryptoWallet(crypto.targetChainId);
       await qc.invalidateQueries({ queryKey: platformCryptoWalletQueryKey(crypto.targetChainId) });
       if (crypto.isConnected) {
-        await crypto.disconnectAsync();
+        await crypto.disconnect();
       }
       toast.success("Shared platform wallet removed");
       setRemoveOpen(false);
@@ -47,7 +48,7 @@ export function PlatformCryptoWalletSection({ embedded = false }: { embedded?: b
       const message = err instanceof Error ? err.message : "Could not remove platform wallet";
       toast.error(message);
     } finally {
-      crypto.setRemoving(false);
+      setRemoving(false);
     }
   };
 

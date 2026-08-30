@@ -11,6 +11,7 @@ export function AccessCodesScreen() {
   const qc = useQueryClient();
   const [label, setLabel] = useState("");
   const [hostName, setHostName] = useState("");
+  const [maxParticipants, setMaxParticipants] = useState<number>(50);
   const [freshCode, setFreshCode] = useState<AccessCode | null>(null);
 
   const listQ = useQuery({
@@ -23,11 +24,13 @@ export function AccessCodesScreen() {
       accessCodesApi.create({
         label: label.trim(),
         host_name: hostName.trim() || undefined,
+        max_participants: maxParticipants || 50,
       }),
     onSuccess: (row) => {
       setFreshCode(row);
       setLabel("");
       setHostName("");
+      setMaxParticipants(50);
       toast.success("Access code created");
       void qc.invalidateQueries({ queryKey: ["admin", "access-codes"] });
     },
@@ -64,15 +67,13 @@ export function AccessCodesScreen() {
           <div>
             <h2 className="text-lg font-semibold">Host access codes</h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              Issue a code, send it to a host, and they sign in on the game app. First use creates
-              their room-admin account. Codes stay visible here so you can resend them if a host
-              forgets.
+              Issue a code, send it to a host, and set the maximum player limit for rooms they create. First use creates their room-admin account.
             </p>
           </div>
         </div>
 
         <form
-          className="mt-5 grid gap-3 sm:grid-cols-[1fr_1fr_auto]"
+          className="mt-5 grid gap-3 sm:grid-cols-[1.5fr_1.5fr_1fr_auto]"
           onSubmit={(e) => {
             e.preventDefault();
             if (label.trim().length < 2) {
@@ -92,6 +93,15 @@ export function AccessCodesScreen() {
             onChange={(e) => setHostName(e.target.value)}
             placeholder="Host name (optional)"
           />
+          <Input
+            type="number"
+            min={2}
+            max={1000}
+            value={maxParticipants}
+            onChange={(e) => setMaxParticipants(Math.max(2, Number(e.target.value) || 2))}
+            placeholder="Max players (50)"
+            title="Maximum player limit for rooms created with this access code"
+          />
           <Button type="submit" disabled={createM.isPending}>
             {createM.isPending ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -106,7 +116,7 @@ export function AccessCodesScreen() {
           <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-primary/30 bg-primary/10 px-4 py-3">
             <div>
               <p className="text-xs font-semibold uppercase tracking-wide text-primary">
-                New access code
+                New access code (Max Players: {freshCode.max_participants || 50})
               </p>
               <p className="mt-1 font-mono text-2xl tracking-[0.28em]">{freshCode.code}</p>
             </div>
@@ -125,6 +135,7 @@ export function AccessCodesScreen() {
               <th className="px-4 py-3 font-medium">Label</th>
               <th className="px-4 py-3 font-medium">Code</th>
               <th className="px-4 py-3 font-medium">Host</th>
+              <th className="px-4 py-3 font-medium">Max Players</th>
               <th className="px-4 py-3 font-medium">Status</th>
               <th className="px-4 py-3 font-medium">Last used</th>
               <th className="px-4 py-3 font-medium" />
@@ -133,13 +144,13 @@ export function AccessCodesScreen() {
           <tbody>
             {listQ.isLoading ? (
               <tr>
-                <td colSpan={6} className="px-4 py-10 text-center text-muted-foreground">
+                <td colSpan={7} className="px-4 py-10 text-center text-muted-foreground">
                   <Loader2 className="mx-auto h-5 w-5 animate-spin" />
                 </td>
               </tr>
             ) : rows.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-4 py-10 text-center text-muted-foreground">
+                <td colSpan={7} className="px-4 py-10 text-center text-muted-foreground">
                   No codes yet.
                 </td>
               </tr>
@@ -168,6 +179,7 @@ export function AccessCodesScreen() {
                     )}
                   </td>
                   <td className="px-4 py-3 text-muted-foreground">{row.host_name || "—"}</td>
+                  <td className="px-4 py-3 font-medium">{row.max_participants || 50}</td>
                   <td className="px-4 py-3">
                     {row.is_active ? (
                       <Badge>Active</Badge>

@@ -81,7 +81,7 @@ export const CreateMarketItemFormDialog = ({
       resolution_criteria_en: data.resolution_criteria_en || undefined,
       resolution_criteria_my: data.resolution_criteria_my || undefined,
       slug: data.slug?.trim() || undefined,
-      options: data.options.map((o) => ({
+      options: data.options.map((o: any) => ({
         title_en: o.title_en,
         title_my: o.title_my || undefined,
         seed_count: o.seed_count,
